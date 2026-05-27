@@ -1,0 +1,98 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>StudySync Pro | Speed Ranked</title><style>
+:root{--p:#6c5ce7;--s:#a29bfe;--b:#f0f3f7;--w:#fff;--d:#ff7675}
+body{font-family:'Segoe UI',sans-serif;background:var(--b);margin:0;display:flex;justify-content:center;transition:0.3s}
+.app{background:var(--w);width:95%;max-width:600px;height:90vh;margin-top:2vh;display:flex;flex-direction:column;box-shadow:0 0 30px #0002;border-radius:15px;overflow:hidden}
+.scr{display:none;padding:30px;flex-grow:1;overflow-y:auto}.act{display:block}
+header{background:var(--p);color:#fff;padding:20px;text-align:center;font-weight:bold;font-size:1.4rem;transition:0.3s}
+nav{display:flex;background:#f8f9fa;border-top:1px solid #ddd;padding:15px 0}
+nav button{flex:1;background:none;border:none;cursor:pointer;font-size:14px;color:#666}
+.on{color:var(--p);font-weight:bold;transform:scale(1.1)}
+.cd{background:#fff;border:1px solid #eee;border-radius:12px;padding:15px;margin-bottom:15px;display:flex;align-items:center;gap:15px;box-shadow:3px 3px 10px #0001}
+.fin{opacity:.5;background:#f1f2f6}.fin span{text-decoration:line-through}
+.im{width:60px;height:60px;border-radius:8px;object-fit:cover;background:#eee}
+input,select,.m-bt{width:100%;padding:14px;margin:8px 0;border:1px solid #ddd;border-radius:10px;font-size:16px;box-sizing:border-box}
+.m-bt{background:var(--p);color:#fff;border:none;font-weight:bold;cursor:pointer;transition:0.3s}
+.bdg{font-size:12px;background:var(--s);color:#fff;padding:4px 8px;border-radius:6px}
+.empty{text-align:center;margin-top:80px;color:#999}
+label{font-size:13px;font-weight:bold;color:var(--p);margin-top:10px;display:block}
+.cp-row{display:flex;align-items:center;gap:15px;margin:15px 0}
+#bg-c{width:60px;height:40px;padding:0;border:none;cursor:pointer;background:none}
+</style></head>
+<body><div class="app"><header id="h">HOME</header>
+<div id="h-s" class="scr act"><div id="l-v"></div></div>
+<div id="a-s" class="scr"><h2>New Assignment</h2>
+<label>Task Name</label><input id="n" placeholder="e.g. Math Practice">
+<label>Due Date</label><input type="date" id="d">
+<div style="display:flex;gap:10px;width:100%">
+<div style="flex:1"><label>Difficulty</label><select id="df"><option value="auto">🤖 Auto-Detect</option><option value="easy">Easy</option><option value="hard">Hard</option></select></div>
+<div style="flex:1"><label>Length</label><select id="ln"><option value="short">Short</option><option value="long">Long</option></select></div>
+</div>
+<label class="m-bt" style="display:block;text-align:center;background:#eee;color:#333;margin-top:20px" for="pi" id="pl">📸 Snap Photo</label>
+<input type="file" id="pi" style="display:none" accept="image/*"><button class="m-bt" onclick="sv()" style="margin-top:15px;font-size:18px">Save Assignment</button></div>
+<div id="s-s" class="scr"><h2>Settings</h2>
+<label>App Theme</label><select id="th" onchange="setTh(this.value)"><option value="classic">Classic Purple</option><option value="midnight">Midnight Dark</option><option value="forest">Forest Green</option><option value="ocean">Ocean Blue</option></select>
+<label>Your Current Grade</label><select id="gr" onchange="localStorage.setItem('gr',this.value)">
+<option value="elementary">Elementary School</option><option value="middle" selected>Middle School</option><option value="college">College / University</option>
+</select>
+<div class="cp-row"><label>Background Color</label><input type="color" id="bg-c" oninput="setBg(this.value)"></div>
+<button class="m-bt" style="background:var(--d);margin-top:30px" onclick="clr()">Delete All Data</button></div>
+<nav><button onclick="nv('h-s',this)" class="on">🏠<br>Home</button><button onclick="nv('a-s',this)">➕<br>Add</button><button onclick="nv('s-s',this)">⚙️<br>Settings</button></nav></div>
+<script>
+let img=null;const g=()=>localStorage.getItem('gr')||'middle';
+const getC=()=>localStorage.getItem('bg_c')||'#f0f3f7';
+const getTh=()=>localStorage.getItem('app_th')||'classic';
+const themes={classic:{p:'#6c5ce7',s:'#a29bfe'},midnight:{p:'#2d3436',s:'#636e72'},forest:{p:'#27ae60',s:'#2ecc71'},ocean:{p:'#0984e3',s:'#74b9ff'}};
+function setTh(v){const t=themes[v];document.documentElement.style.setProperty('--p',t.p);document.documentElement.style.setProperty('--s',t.s);localStorage.setItem('app_th',v)}
+function setBg(c){document.body.style.background=c;localStorage.setItem('bg_c',c)}
+function nv(id,b){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('act'));document.querySelectorAll('nav button').forEach(n=>n.classList.remove('on'));
+document.getElementById(id).classList.add('act');b.classList.add('on');
+let t="HOME";if(id==='a-s')t="ADD ASSIGNMENT";if(id==='s-s')t="SETTINGS";document.getElementById('h').innerText=t}
+document.getElementById('pi').onchange=(e)=>{const r=new FileReader();r.onload=()=>{img=r.result;document.getElementById('pl').innerText="✅ Photo Attached"};r.readAsDataURL(e.target.files[0])};
+
+function sv(){const n=document.getElementById('n').value,d=document.getElementById('d').value;
+if(!n||!d)return alert("Missing info!");
+const t={id:Date.now(),n,d,img,tm:clc(n),f:false};
+const ts=JSON.parse(localStorage.getItem('st_v'))||[];ts.push(t);localStorage.setItem('st_v',JSON.stringify(ts));
+rd();nv('h-s',document.querySelector('nav button'));document.getElementById('n').value='';img=null;document.getElementById('pl').innerText="📸 Snap Photo"}
+
+function clc(name) {
+    const grade = g();
+    let diff = document.getElementById('df').value;
+    const len = document.getElementById('ln').value;
+    const n = name.toLowerCase();
+
+    // 1. Keyword Check
+    if (diff === 'auto') {
+        diff = 'easy';
+        const elementaryHard = ['multiplication', 'division', 'fractions', 'spelling'];
+        const secondaryHard = ['calculus', 'thesis', 'physics', 'advanced', 'final'];
+        if (grade === 'elementary' && elementaryHard.some(w => n.includes(w))) diff = 'hard';
+        if (grade === 'college' && secondaryHard.some(w => n.includes(w))) diff = 'hard';
+    }
+
+    // 2. Exact Hierarchy Logic (Elementary > Middle > College)
+    let time = 0;
+    if (grade === 'elementary') {
+        time = (diff === 'easy') ? 45 : 60; // Slowest
+    } else if (grade === 'middle') {
+        time = (diff === 'easy') ? 25 : 45; // Middle
+    } else if (grade === 'college') {
+        time = (diff === 'easy') ? 10 : 40; // Fastest (for easy tasks)
+    }
+
+    if (len === 'long') time *= 2;
+    return time >= 60 ? `${Math.floor(time/60)}h ${time%60}m` : `${time}m`;
+}
+
+function rd(){const v=document.getElementById('l-v');v.innerHTML='';const ts=JSON.parse(localStorage.getItem('st_v'))||[];
+if(ts.length===0){v.innerHTML='<div class="empty"><h2>No work to do!</h2><p style="font-size:60px">😊</p></div>';return}
+ts.forEach(t=>{const d=document.createElement('div');d.className=`cd ${t.f?'fin':''}`;
+d.innerHTML=`<input type="checkbox" style="width:25px;height:25px" ${t.f?'checked':''} onclick="tg(${t.id})">${t.img?`<img src="${t.img}" class="im">`:'📚'}
+<div style="flex:1"><span style="font-size:18px;font-weight:bold">${t.n}</span><br><small style="color:var(--d);font-size:14px">${t.d}</small> ${t.img?`<span class="bdg">⏳ ${t.tm}</span>`:''}</div>
+<button style="border:none;background:none;color:var(--d);font-size:24px" onclick="rm(${t.id})">🗑</button>`;v.prepend(d)})}
+function tg(i){let s=JSON.parse(localStorage.getItem('st_v'));s=s.map(t=>{if(t.id===i)t.f=!t.f;return t});localStorage.setItem('st_v',JSON.stringify(s));rd()}
+function rm(i){let s=JSON.parse(localStorage.getItem('st_v')).filter(t=>t.id!==i);localStorage.setItem('st_v',JSON.stringify(s));rd()}
+function clr(){if(confirm("Wipe data?")){localStorage.clear();location.reload()}}
+window.onload=()=>{document.getElementById('gr').value=g();const c=getC();document.getElementById('bg-c').value=c;setBg(c);const t=getTh();document.getElementById('th').value=t;setTh(t);rd()};
+</script></body></html>
